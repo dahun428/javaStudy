@@ -1,0 +1,84 @@
+package com.dahun.bookstore.service;
+
+import com.dahun.bookstore.vo.Rental;
+import com.dahun.bookstore.vo.User;
+
+public class RentalService {
+
+	private Rental[] db = new Rental[100];
+	private int position = 0;
+	private int rentalSequence = 50001;
+	
+	// 대여정보 저장 기능
+	// 전달받은 대여정보를 db에 저장한다.
+	public void insertRental(Rental rental) {
+		rental.no = rentalSequence;
+		db[position] = rental;
+		
+		position++;
+		rentalSequence++;
+	}
+	
+	// 대여정보 조회기능
+	// 대여번호에 해당하는 대여정보를 반환한다.
+	public Rental findRentalByNo(int rentalNo) {
+		Rental result = null;
+		for(int i = 0; i < position; i++) {
+			Rental rental = db[i];
+			if(rental != null) {
+				if(rental.no == rentalNo) {
+					result = rental;
+					break;
+				}	
+			}else {
+				System.out.println("해당하는 대여번호가 존재하지 않습니다.");
+			}
+			
+		}
+		
+		return result;
+	}
+	
+	public static void main(String[] args) {
+		RentalService rental = new RentalService();
+		int rentalNo = 50001;
+		System.out.println(rental.findRentalByNo(rentalNo));
+	}
+	// 반납처리 기능
+	// 사용자번호를 전달받아서 그 사용자의 모든 대여도서를 반납처리하는 기능
+	public void returnAllRentalByUserNo(int userNo) {
+		Rental[] rentals = new Rental[position];
+		UserService userService = new UserService();
+//		BookService bookService = new BookService();
+		
+		User user = userService.findUserByNo(userNo);
+		
+		//대여 userNo와 회원 userNo가 같다면
+		for(int i = 0; i < position; i++) {
+			Rental rental = rentals[i];
+			rental = db[i];
+			if(rental.userNo == user.getNo()) {
+				BookstoreService bs = new BookstoreService();
+				bs.returnBook(rental.no);
+//				Book book = bookService.findBookByNo(rental.bookNo);
+//				book.stock++;
+//				rental.setRent(false);
+			}
+			
+		}
+		System.out.println("회원탈퇴가 완료되었습니다.");
+		
+	}
+	
+	// 대여현황조회기능
+	// 모든 대여정보를 반환한다.
+	public Rental[] getAllRentals() {
+		Rental[] rental = new Rental[position];
+		for(int i = 0; i < position; i++) {
+			rental[i] = db[i];
+		}
+		
+		return rental;
+	}
+	
+}
